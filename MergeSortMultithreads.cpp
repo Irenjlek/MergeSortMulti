@@ -2,6 +2,7 @@
 #include <future>
 #include <chrono>
 #include <random>
+#include "RequestHandler.h"
 
 bool make_thread = true;
 
@@ -61,11 +62,12 @@ void print(int* arr, int size) {
 void mergeSort(int* arr, int l, int r) {
     if (l >= r) return;
     int m = (l + r - 1) / 2;
-    if (make_thread && (m - l > 10000))
+    if (make_thread && (m - l > 100000))
     {
-        std::future<void> f = std::async(std::launch::async, [&]() {
+        std::future<void> f = std::async(std::launch::async, [=]() {
             mergeSort(arr, l, m);
             });
+        f.get();
         mergeSort(arr, m + 1, r);
     }
     else {
@@ -100,13 +102,12 @@ void quicksort(int* array, long left, long right) {
         }
     } while (left_bound <= right_bound);
 
+    RequestHandler pool;
     if (make_thread && (right_bound - left > 10000))
     {
         // если элементов в левой части больше чем 10000
         // вызываем асинхронно рекурсию для правой части
-        auto f = async(launch::async, [&]() {
-            quicksort(array, left, right_bound);
-            });
+        pool.pushRequest(quicksort, array, left, right_bound);
         quicksort(array, left_bound, right);
     }
     else {
@@ -128,8 +129,8 @@ int main()
 
     // многопоточный запуск
     time(&start);
-    //quicksort(array, 0, arr_size);
-    mergeSort(array, 0, arr_size - 1);
+    quicksort(array, 0, arr_size);
+    //mergeSort(array, 0, arr_size - 1);
     time(&end);
 
     double seconds = difftime(end, start);
@@ -148,8 +149,8 @@ int main()
     // однопоточный запуск
     make_thread = false;
     time(&start);
-    //quicksort(array, 0, arr_size);
-    mergeSort(array, 0, arr_size - 1);
+    quicksort(array, 0, arr_size);
+    //mergeSort(array, 0, arr_size - 1);
     time(&end);
     seconds = difftime(end, start);
     printf("The time: %f seconds\n", seconds);
