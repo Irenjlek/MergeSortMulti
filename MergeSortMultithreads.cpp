@@ -5,6 +5,7 @@
 #include "RequestHandler.h"
 
 bool make_thread = true;
+RequestHandler pool;
 
 void merge(int* arr, int l, int m, int r)
 {
@@ -102,11 +103,8 @@ void quicksort(int* array, long left, long right) {
         }
     } while (left_bound <= right_bound);
 
-    RequestHandler pool;
     if (make_thread && (right_bound - left > 10000))
     {
-        // если элементов в левой части больше чем 10000
-        // вызываем асинхронно рекурсию для правой части
         pool.pushRequest(quicksort, array, left, right_bound);
         quicksort(array, left_bound, right);
     }

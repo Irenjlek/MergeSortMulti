@@ -1,5 +1,5 @@
 #pragma once
-#include "ThreadPool.h"
+#include "OptimizedThreadPool.h"
 
 class RequestHandler
 {
@@ -10,6 +10,6 @@ public:
     void pushRequest(FuncType f, int* array, long left, long right);
 private:
     // пул потоков
-    ThreadPool m_tpool;
+    OptimizedThreadPool m_tpool;
 };
 
